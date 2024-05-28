@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -67,16 +64,24 @@ public class S3Service {
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()
           .bucket(bucketName)
           .key(fullPath)
+          .acl(ObjectCannedACL.PUBLIC_READ)
           .contentType(file.getContentType())  // Content-Type 설정
           .build();
 
       s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
 System.out.println("fullPath : " + fullPath);
-      return getPresignedUrl(fullPath);
+// 유효시간 1시간.
+//      return getPresignedUrl(fullPath);
+      // 유효시간 퍼블릭으로
+      return getPublicUrl(fullPath);
     } catch (S3Exception | IOException e) {
       e.printStackTrace();
       return "File upload failed: " + e.getMessage();
     }
+  }
+  // 유효시간 퍼블릭으로
+  private String getPublicUrl(String objectKey) {
+    return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, objectKey);
   }
 
   private String getPresignedUrl(String objectKey) {
