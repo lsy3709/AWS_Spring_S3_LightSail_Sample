@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Multi Image Upload</title>
+</head>
+<body>
+<h1>Multi Image Upload</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+  <input type="file" name="files" id="fileInput" accept="image/*" multiple/>
+  <button type="button" onclick="uploadImages()">Upload</button>
+</form>
+<form id="downloadForm">
+  <input type="text" name="fileKey" id="fileKeyInput" placeholder="Enter file key"/>
+  <button type="button" onclick="downloadImage()">Download</button>
+</form>
+<p id="status"></p>
+<script>
+  function uploadImages() {
+    const fileInput = document.getElementById('fileInput');
+    const files = fileInput.files;
+    if (files.length === 0) {
+      alert("Please select image files to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api2/files/multi-upload", true);
+    xhr.onload = function () {
+      const status = document.getElementById('status');
+      if (xhr.status === 200) {
+        status.textContent = "Upload successful: " + xhr.responseText;
+      } else {
+        status.textContent = "Upload failed: " + xhr.responseText;
+      }
+    };
+    xhr.send(formData);
+  }
+
+  function downloadImage() {
+    const fileKeyInput = document.getElementById('fileKeyInput');
+    const fileKey = fileKeyInput.value.trim();
+    if (!fileKey) {
+      alert("Please enter a file key to download.");
+      return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `/api2/files/download?key=${encodeURIComponent(fileKey)}`, true);
+    xhr.responseType = 'blob';
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        const url = window.URL.createObjectURL(xhr.response);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileKey;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert("Download failed: " + xhr.responseText);
+      }
+    };
+    xhr.send();
+  }
+</script>
+</body>
+</html>
