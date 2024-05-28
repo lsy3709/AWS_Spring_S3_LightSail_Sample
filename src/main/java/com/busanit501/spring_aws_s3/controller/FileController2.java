@@ -52,10 +52,3 @@ public class FileController2 {
         .body(resource);
   }
 }
-
-
-
-
-
-
-
