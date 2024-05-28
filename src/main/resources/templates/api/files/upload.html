@@ -16,6 +16,8 @@
 <div id="linkContainer"></div>
 <p id="status"></p>
 <script>
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
   function uploadImages() {
     const fileInput = document.getElementById('fileInput');
     const files = fileInput.files;
@@ -26,6 +28,10 @@
 
     const formData = new FormData();
     for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`File ${file.name} exceeds the maximum size of 10MB.`);
+        return;
+      }
       formData.append("files", file);
     }
 
@@ -40,6 +46,7 @@
         urls.forEach(url => {
           const link = document.createElement('a');
           link.href = url;
+          link.target = "_blank";
           link.textContent = "View Uploaded File";
           linkContainer.appendChild(link);
           linkContainer.appendChild(document.createElement('br'));
