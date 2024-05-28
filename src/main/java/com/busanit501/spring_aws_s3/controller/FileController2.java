@@ -27,14 +27,18 @@ public class FileController2 {
 
   @PostMapping("/upload")
   public String uploadFile(@RequestParam("file") MultipartFile file) {
-    return s3Service.uploadFile(file);
+    String fileUrl = s3Service.uploadFile(file);
+    return "<a href=\"" + fileUrl + "\" target=\"_blank\">View Uploaded File</a>";
   }
 
   @PostMapping("/multi-upload")
   public List<String> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
-    return List.of(files).stream()
+    List<String> urlList = List.of(files).stream()
         .map(s3Service::uploadFile)
+//        .map(fileUrl -> "<a href=\"" + fileUrl + "\" target=\"_blank\">View Uploaded File</a>")
         .collect(Collectors.toList());
+
+    return urlList;
   }
 
   @GetMapping("/download")

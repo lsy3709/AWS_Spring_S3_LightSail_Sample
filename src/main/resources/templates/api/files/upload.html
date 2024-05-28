@@ -13,6 +13,7 @@
   <input type="text" name="fileKey" id="fileKeyInput" placeholder="Enter file key"/>
   <button type="button" onclick="downloadImage()">Download</button>
 </form>
+<div id="linkContainer"></div>
 <p id="status"></p>
 <script>
   function uploadImages() {
@@ -32,8 +33,18 @@
     xhr.open("POST", "/api2/files/multi-upload", true);
     xhr.onload = function () {
       const status = document.getElementById('status');
+      const linkContainer = document.getElementById('linkContainer');
       if (xhr.status === 200) {
-        status.textContent = "Upload successful: " + xhr.responseText;
+        const urls = JSON.parse(xhr.responseText);
+        linkContainer.innerHTML = '';
+        urls.forEach(url => {
+          const link = document.createElement('a');
+          link.href = url;
+          link.textContent = "View Uploaded File";
+          linkContainer.appendChild(link);
+          linkContainer.appendChild(document.createElement('br'));
+        });
+        status.textContent = "Upload successful";
       } else {
         status.textContent = "Upload failed: " + xhr.responseText;
       }

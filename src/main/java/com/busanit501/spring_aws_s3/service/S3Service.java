@@ -29,6 +29,9 @@ public class S3Service {
   @Value("${aws.bucketName}")
   private String bucketName;
 
+  @Value("${aws.region}")
+  private String region;
+
   public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
     this.s3Client = s3Client;
     this.s3Presigner = s3Presigner;
@@ -64,10 +67,11 @@ public class S3Service {
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()
           .bucket(bucketName)
           .key(fullPath)
+          .contentType(file.getContentType())  // Content-Type 설정
           .build();
 
       s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
-
+System.out.println("fullPath : " + fullPath);
       return getPresignedUrl(fullPath);
     } catch (S3Exception | IOException e) {
       e.printStackTrace();
